@@ -38,7 +38,7 @@ Locate `src/server.ts`, `wrangler.jsonc`, `Dockerfile.render`, and `deploy/rende
 
 ## 2. Connect the data provider locally
 
-Create a Git-ignored `.env` from the example. Copy DataForSEO's Base64 API credential into `DATAFORSEO_API_KEY`. This represents the API login and API password, not the website account password.
+Copy `deploy/render/operator.env.example` to a Git-ignored `.env` on your own computer. Copy DataForSEO's Base64 API credential into `DATAFORSEO_API_KEY`. This represents the API login and API password, not the website account password. Keep a separate environment file for the local experiment so its authentication setting cannot accidentally be reused for hosting.
 
 For a loopback-only local experiment, use upstream's `AUTH_MODE=local_noauth` and follow its Docker or local-development guide. Confirm the account connection with the free `GET /v3/appendix/user_data` endpoint before making a small keyword request. Record the query, returned market, and actual request cost.
 
@@ -49,6 +49,28 @@ For a loopback-only local experiment, use upstream's `AUTH_MODE=local_noauth` an
 In Cloudflare Zero Trust, create a self-hosted Access application for your dashboard hostname, for example `seo.example.com`. Add an allow policy containing your email and your teammate's email, and enable your chosen identity provider.
 
 Record the Access team origin as `TEAM_DOMAIN` and application audience as `POLICY_AUD`. Set `AUTH_MODE=cloudflare_access` for the hosted version. A JWT must have a valid signature, issuer, audience, expiry, subject, and email before OpenSEO accepts it.
+
+To configure Access through the supplied API helper, create a scoped Cloudflare token with Account → Access: Apps and Policies → Edit; Account → Access: Organizations, Identity Providers, and Groups → Edit; Zone → DNS → Edit; and Zone → Zone → Read. Restrict it to your account and selected zone. Store it as `CLOUDFLARE_API_TOKEN` in the operator environment file. First inspect the existing configuration:
+
+```bash
+python3 deploy/render/cloudflare_setup.py \
+  --env-file /absolute/path/to/your/.env \
+  --state /absolute/path/to/cloudflare-state.json \
+  --zone example.com --domain seo.example.com inspect
+```
+
+Then replace the example addresses with your two approved users and provision the application:
+
+```bash
+python3 deploy/render/cloudflare_setup.py \
+  --env-file /absolute/path/to/your/.env \
+  --state /absolute/path/to/cloudflare-state.json \
+  --zone example.com --domain seo.example.com \
+  --team-name your-unique-team-name \
+  provision --emails you@example.com teammate@example.com
+```
+
+The helper reuses the account's existing Zero Trust team, enables email PIN if needed, and saves `TEAM_DOMAIN` and `POLICY_AUD` into the operator file. It stops when an existing hostname or policy conflicts instead of replacing unrelated configuration. An account that has not completed Zero Trust onboarding may require that setup in the Cloudflare dashboard first.
 
 The adapter protects application pages, API calls, MCP, and backup operations through the same gateway. `/healthz` returns only readiness; it grants no dashboard access.
 
@@ -70,6 +92,8 @@ python3 deploy/render/manage.py \
 ```
 
 Use `status` and `logs` to inspect the deployment. Attach your domain, create the proxied Cloudflare CNAME to Render, and complete HTTPS verification. Keep the disk mounted at `/app/.wrangler`.
+
+Use `manage.py` with `--domain seo.example.com add-domain` to attach the hostname. Then run `cloudflare_setup.py` with your same environment, state, zone, and domain arguments plus `--render-host YOUR-SERVICE.onrender.com dns`. Use the exact hostname returned by Render. Both scripts keep management tokens on your computer.
 
 **Checkpoint:** The service is healthy, your custom hostname opens the login flow, and the direct Render address does not bypass it.
 
@@ -97,6 +121,8 @@ Follow the runbook to restore into a separate stopped test instance. Check SQLit
 
 **Checkpoint:** You have demonstrated restoration, not merely downloaded an archive.
 
+The instructor's local verification restored 16 SQLite databases with successful integrity checks, then opened the restored dashboard and read the saved rank result and completed 10-page audit. This establishes the local restore path. Live Render restoration and team authentication remain separate publication checks.
+
 ## Troubleshooting
 
 | Symptom | Check |
@@ -118,6 +144,10 @@ An optional next exercise is connecting an AI agent through OpenSEO's MCP server
 ## Cleanup and maintenance
 
 Stop paid tracking schedules before leaving an installation unused. Download a backup before deleting a Render service or disk. Remove only the DNS records and Access application created for this lab, and revoke temporary deployment tokens when they are no longer needed. Review the lab against a pinned upstream version before publishing updates.
+
+For the initial verification, use one keyword, one market, one device, and a 10-page audit with Lighthouse off. Return rank tracking to manual after the scheduling exercise. The instructor observed a $0.140656 DataForSEO account balance decrease during the local verification window; this is not a fixed lab price or an isolated request-cost measurement. Record your own usage and consult current provider pricing before expanding the workload.
+
+Before publication, replace the pending last-verified date with the date of the full live check and record the exact adapter commit. Recheck monthly and after upstream, provider API, or hosting changes; mark the lab as needing an update if a checkpoint fails.
 
 ## References
 
