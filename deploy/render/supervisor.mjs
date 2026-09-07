@@ -78,6 +78,13 @@ let operations = {
 };
 const stateFile = ".wrangler/render-operations.json";
 await mkdir(".wrangler", { recursive: true });
+// The persistent mount hides the build's .wrangler directory. Restore the
+// current image's Worker manifest on every boot, including after upgrades.
+await mkdir(".wrangler/deploy", { recursive: true });
+await writeFile(
+  ".wrangler/deploy/config.json",
+  await readFile("dist/render-deploy-config.json"),
+);
 try {
   operations = {
     ...operations,

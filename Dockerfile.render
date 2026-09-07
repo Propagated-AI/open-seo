@@ -12,7 +12,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 # Only public build configuration belongs here; API credentials arrive at runtime.
 ENV AUTH_MODE=cloudflare_access VITE_SHOW_DEVTOOLS=false OPENSEO_TELEMETRY_DISABLED=1
-RUN pnpm build
+RUN pnpm build && cp .wrangler/deploy/config.json dist/render-deploy-config.json
 COPY --from=gateway /usr/bin/caddy /usr/local/bin/caddy
 ENV CLOUDFLARE_INCLUDE_PROCESS_ENV=true PORT=10000
 EXPOSE 10000
