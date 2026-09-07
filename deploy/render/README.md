@@ -4,7 +4,7 @@ This adaptation keeps the upstream OpenSEO application and shared-workspace mode
 
 ## Components
 
-- `Dockerfile.render`: builds the app before deployment, includes Caddy 2.11.4, and starts the supervisor.
+- `Dockerfile.render`: builds the app before deployment, includes Caddy 2.11.4 with its unneeded low-port file capability removed for Render compatibility, and starts the supervisor.
 - `Caddyfile`: exposes only port 10000; authenticates every application and operations request through OpenSEO's Cloudflare JWT verifier. `/healthz` exposes only readiness. Internal scheduling and Cloudflare development endpoints are blocked publicly.
 - `supervisor.mjs`: installs the runtime bindings into the two built Workers, migrates the persistent database, supervises Caddy and OpenSEO, invokes scheduled work every five minutes, and produces consistent backups.
 - `manage.py`: creates and inspects the service through the Render API without printing credentials.
