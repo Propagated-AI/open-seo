@@ -248,8 +248,9 @@ export function runSelfhostPreflight(env: EnvRecord): PreflightResult {
     key: "runtime",
     name: "Scheduled checks",
     level: "info",
-    message:
-      "Rank-tracking schedules do not run in Docker mode — trigger checks from the Rank Tracking page.",
+    message: get(env, "RENDER_MAINTENANCE_KEY")
+      ? "Render supervisor runs scheduled rank checks and audit reconciliation every five minutes."
+      : "Rank-tracking schedules do not run in Docker mode — trigger checks from the Rank Tracking page.",
   });
 
   return { items, failed: items.some((item) => item.level === "fail") };
