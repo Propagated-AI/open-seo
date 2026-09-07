@@ -50,7 +50,11 @@ In Cloudflare Zero Trust, create a self-hosted Access application for your dashb
 
 Record the Access team origin as `TEAM_DOMAIN` and application audience as `POLICY_AUD`. Set `AUTH_MODE=cloudflare_access` for the hosted version. A JWT must have a valid signature, issuer, audience, expiry, subject, and email before OpenSEO accepts it.
 
-To configure Access through the supplied API helper, create a scoped Cloudflare token with Account → Access: Apps and Policies → Edit; Account → Access: Organizations, Identity Providers, and Groups → Edit; Zone → DNS → Edit; and Zone → Zone → Read. Restrict it to your account and selected zone. Store it as `CLOUDFLARE_API_TOKEN` in the operator environment file. First inspect the existing configuration:
+To configure Access through the supplied API helper, create a scoped Cloudflare token. In the account-token form verified on 7 September 2026, add two separate permission policies. For the account, choose Cloudflare One / Zero Trust → Access → Edit and Access: Organizations, Identity Providers, and Groups → Edit. For the selected domain, choose DNS → Edit and Zone → Read. Keep both policies in the final summary; changing the first policy's resource to a domain can remove its account permissions. Store the token as `CLOUDFLARE_API_TOKEN` and its account ID as `CLOUDFLARE_ACCOUNT_ID` in the operator environment file. The helper verifies account-owned tokens at the account-specific endpoint and checks the domain belongs to that account.
+
+If Zero Trust has not been enabled, complete Cloudflare's onboarding first. The Free plan supports this two-person exercise. The activation screen may require billing information, agreement to terms, and authorization for usage beyond free limits; the account owner must review and complete this step. A token can verify as active while still lacking the permissions or enabled products needed for Access setup.
+
+First inspect the existing configuration:
 
 ```bash
 python3 deploy/render/cloudflare_setup.py \

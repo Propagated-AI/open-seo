@@ -45,11 +45,21 @@ def main():
             raise SystemExit(json.dumps(result.get("errors", [])).replace(token, "[redacted]"))
         return result["result"]
 
+    configured_account = values.get("CLOUDFLARE_ACCOUNT_ID")
+    if token.startswith("cfat_"):
+        if not configured_account:
+            raise SystemExit("Set CLOUDFLARE_ACCOUNT_ID for this account-owned token")
+        verification = request(f"accounts/{configured_account}/tokens/verify")
+        if verification.get("status") != "active":
+            raise SystemExit("The Cloudflare account token is not active")
+
     zones = request("zones?" + urllib.parse.urlencode({"name": args.zone, "status": "active"}))
     if len(zones) != 1:
         raise SystemExit("Expected exactly one active zone matching the requested domain")
     zone = zones[0]
     zone_id, account_id = zone["id"], zone["account"]["id"]
+    if configured_account and account_id != configured_account:
+        raise SystemExit("The requested zone belongs to a different Cloudflare account")
     prefix = f"accounts/{account_id}/access"
     state = json.loads(args.state.read_text()) if args.state.exists() else {}
     if args.action == "dns":
