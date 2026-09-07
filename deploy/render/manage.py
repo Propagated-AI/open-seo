@@ -36,7 +36,7 @@ def main():
     parser.add_argument("--plan", default="1c-2g")
     parser.add_argument("--commit")
     parser.add_argument("--domain", default="seo.propagated.ai")
-    parser.add_argument("action", choices=["create", "status", "logs", "deploy", "restart", "add-domain"])
+    parser.add_argument("action", choices=["create", "status", "logs", "deploy", "restart", "add-domain", "verify-domain"])
     args = parser.parse_args()
     values = read_env(args.env_file)
 
@@ -118,6 +118,10 @@ def main():
             {"commitId": args.commit} if args.commit else {}), indent=2))
     elif args.action == "restart":
         print(json.dumps(request(f"services/{sid}/restart", "POST"), indent=2))
+    elif args.action == "verify-domain":
+        domain = urllib.parse.quote(args.domain, safe="")
+        request(f"services/{sid}/custom-domains/{domain}/verify", "POST")
+        print(json.dumps(request(f"services/{sid}/custom-domains/{domain}"), indent=2))
     elif args.action == "add-domain":
         domains = request(f"services/{sid}/custom-domains")
         if any(row.get("customDomain", row).get("name") == args.domain for row in domains):

@@ -24,6 +24,7 @@ def main():
     parser.add_argument("--team-name", default="propagated-openseo")
     parser.add_argument("--emails", nargs="+")
     parser.add_argument("--render-host")
+    parser.add_argument("--dns-only", action="store_true", help="Use DNS-only while Render verifies the domain; rerun without this flag to enable Access proxying")
     parser.add_argument("action", choices=["inspect", "provision", "dns"])
     args = parser.parse_args()
     values = read_env(args.env_file)
@@ -70,13 +71,13 @@ def main():
             if len(records) != 1 or records[0].get("type") != "CNAME" or records[0].get("content") != args.render_host:
                 raise SystemExit("Existing DNS record differs; inspect it before making changes")
             record = records[0]
-            if not record.get("proxied"):
-                record = request(f"zones/{zone_id}/dns_records/{record['id']}", "PATCH", {"proxied": True})
+            if record.get("proxied") != (not args.dns_only):
+                record = request(f"zones/{zone_id}/dns_records/{record['id']}", "PATCH", {"proxied": not args.dns_only})
         else:
             record = request(f"zones/{zone_id}/dns_records", "POST", {
                 "type": "CNAME", "name": args.domain, "content": args.render_host,
-                "proxied": True, "ttl": 1, "comment": "Private OpenSEO dashboard on Render"})
-        state.update(dnsRecordId=record["id"], renderHost=args.render_host)
+                "proxied": not args.dns_only, "ttl": 1, "comment": "Private OpenSEO dashboard on Render"})
+        state.update(dnsRecordId=record["id"], renderHost=args.render_host, proxied=record["proxied"])
     else:
         # An empty list indicates Access has not yet been configured. Errors
         # are left visible rather than guessing permission failures mean absence.

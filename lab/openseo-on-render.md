@@ -97,7 +97,7 @@ python3 deploy/render/manage.py \
 
 Use `status` and `logs` to inspect the deployment. Attach your domain, create the proxied Cloudflare CNAME to Render, and complete HTTPS verification. Keep the disk mounted at `/app/.wrangler`.
 
-Use `manage.py` with `--domain seo.example.com add-domain` to attach the hostname. Then run `cloudflare_setup.py` with your same environment, state, zone, and domain arguments plus `--render-host YOUR-SERVICE.onrender.com dns`. Use the exact hostname returned by Render. Both scripts keep management tokens on your computer.
+Use `manage.py` with `--domain seo.example.com add-domain` to attach the hostname. Then run `cloudflare_setup.py` with your same environment, state, zone, and domain arguments plus `--render-host YOUR-SERVICE.onrender.com --dns-only dns`. Use `manage.py --domain seo.example.com verify-domain` with the same operator file and Render state file to request verification. Once verified and HTTPS works, rerun the Cloudflare helper without `--dns-only` so the hostname uses the Access proxy. Use the exact service hostname returned by Render. Both scripts keep management tokens on your computer; OpenSEO still enforces JWT authentication during DNS verification.
 
 **Checkpoint:** The service is healthy, your custom hostname opens the login flow, and the direct Render address does not bypass it.
 
