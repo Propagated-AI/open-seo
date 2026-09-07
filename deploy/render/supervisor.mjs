@@ -95,7 +95,7 @@ async function command(command, args) {
   if (code !== 0) throw new Error(`${command} exited with ${code}`);
 }
 async function stopChild(child) {
-  if (!child || child.exitCode !== null) return;
+  if (!child || child.exitCode !== null || child.signalCode !== null) return;
   const exited = once(child, "exit");
   try {
     process.kill(-child.pid, "SIGTERM");
@@ -247,19 +247,25 @@ async function shutdown(code = 0) {
 let interval;
 process.on("SIGTERM", () => void shutdown());
 process.on("SIGINT", () => void shutdown());
-await command("pnpm", ["exec", "tsx", "scripts/selfhost-preflight.ts"]);
-await command("pnpm", ["run", "db:migrate:local"]);
-startApp();
-server.listen(3102, "127.0.0.1");
-gateway = launch(
-  process.env.CADDY_BINARY || "caddy",
-  ["run", "--config", "deploy/render/Caddyfile", "--adapter", "caddyfile"],
-  caddyEnv,
-);
-gateway.on("exit", () => {
-  if (!stopping) void shutdown(1);
-});
-await waitHealthy();
-console.log("[render] Authenticated gateway and database are ready");
-await tick();
-interval = setInterval(() => void tick(), 5 * 60 * 1000);
+try {
+  await command("pnpm", ["exec", "tsx", "scripts/selfhost-preflight.ts"]);
+  await command("pnpm", ["run", "db:migrate:local"]);
+  startApp();
+  server.listen(3102, "127.0.0.1");
+  gateway = launch(
+    process.env.CADDY_BINARY || "caddy",
+    ["run", "--config", "deploy/render/Caddyfile", "--adapter", "caddyfile"],
+    caddyEnv,
+  );
+  gateway.on("exit", () => {
+    if (!stopping) void shutdown(1);
+  });
+  gateway.on("error", () => void shutdown(1));
+  await waitHealthy();
+  console.log("[render] Authenticated gateway and database are ready");
+  await tick();
+  interval = setInterval(() => void tick(), 5 * 60 * 1000);
+} catch (error) {
+  console.error("[render] Startup failed:", error.message);
+  await shutdown(1);
+}
