@@ -21,15 +21,19 @@
 		forward_auth 127.0.0.1:3101 {
 			uri /_internal/access-check
 			header_up Host localhost:3101
+			# Render terminates public HTTPS before this HTTP listener.
+			header_up X-Forwarded-Proto https
 		}
 		handle /_ops/* {
 			reverse_proxy 127.0.0.1:3102 {
+				header_up X-Forwarded-Proto https
 				header_up -Authorization
 			}
 		}
 		handle {
 			reverse_proxy 127.0.0.1:3101 {
 				header_up Host localhost:3101
+				header_up X-Forwarded-Proto https
 				header_up -Authorization
 				header_up -X-Render-Maintenance-Key
 			}

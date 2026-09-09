@@ -10,6 +10,8 @@ This adaptation keeps the upstream OpenSEO application and shared-workspace mode
 - `manage.py`: creates and inspects the service through the Render API without printing credentials.
 - `render.yaml`: reusable Blueprint equivalent to the API deployment.
 
+Render terminates public HTTPS before forwarding HTTP to Caddy. The protected proxy handlers explicitly set `X-Forwarded-Proto: https` so Google callbacks, MCP origins, and operations checks use the public scheme. This Render configuration assumes HTTPS at the external edge. Validate it with `CADDY_BINARY=/path/to/caddy python3 -m unittest discover -s deploy/render -p test_caddy.py`; the test uses temporary loopback backends on ports 3101 and 3102.
+
 The app and operations listener bind to loopback ports 3101 and 3102. Caddy is the sole public listener. Both the custom hostname and direct Render address therefore require a valid Cloudflare Access token. A healthy container alone does not prove that user login or paid SEO endpoints work; verify them separately.
 
 ## Required configuration
