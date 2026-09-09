@@ -127,6 +127,10 @@ Follow the runbook to restore into a separate stopped test instance. Check SQLit
 
 The instructor's local verification restored 16 SQLite databases with successful integrity checks, then opened the restored dashboard and read the saved rank result and completed 10-page audit. This establishes the local restore path. Live Render restoration and team authentication remain separate publication checks.
 
+## Optional extension: Google Search Console and Analytics
+
+Follow the [Google OAuth walkthrough](google-oauth-setup.md) for each click, field value, audience branch, callback URL, and verification checkpoint. It distinguishes enabled APIs, OAuth credentials, dashboard access, and permission to read an existing property. Students use their own accounts and domains. The walkthrough is documentation-reviewed on 8 September 2026; live consent and property connections remain pending verification.
+
 ## Troubleshooting
 
 | Symptom | Check |
