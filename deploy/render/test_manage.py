@@ -20,6 +20,9 @@ class RenderManagementTests(unittest.TestCase):
         env = Path(folder.name) / ".env"
         env.write_text("RENDER_API_KEY=render-secret\nDATAFORSEO_API_KEY=data-secret\n"
             "TEAM_DOMAIN=https://test.cloudflareaccess.com\nPOLICY_AUD=audience\n"
+            "AI_PROVIDER=openai\nOPENAI_API_KEY=ai-secret\nOPENAI_MODEL=test-model\n"
+            "ANTHROPIC_API_KEY=anthropic-secret\nANTHROPIC_MODEL=other-model\n"
+            "OPENROUTER_API_KEY=router-secret\nOPENROUTER_MODEL=provider/model\n"
             "UNRELATED_API_KEY=must-not-be-deployed\n")
         state = Path(folder.name) / "state.json"
         requests = []
@@ -51,6 +54,11 @@ class RenderManagementTests(unittest.TestCase):
         self.assertEqual(state["serviceId"], "srv-test")
         self.assertNotIn("data-secret", output)
         self.assertNotIn("render-secret", output)
+        self.assertEqual(values["AI_PROVIDER"], "openai")
+        self.assertEqual(values["OPENAI_API_KEY"], "ai-secret")
+        self.assertEqual(values["ANTHROPIC_API_KEY"], "anthropic-secret")
+        self.assertEqual(values["OPENROUTER_MODEL"], "provider/model")
+        self.assertNotIn("ai-secret", output)
 
     def test_existing_matching_service_is_not_created_again(self):
         requests, state, _ = self.run_create(existing=[{"service": {

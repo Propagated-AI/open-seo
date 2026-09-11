@@ -1,3 +1,4 @@
+import { AI_CHAT_ENV_KEYS } from "@/lib/ai-config";
 import { count } from "drizzle-orm";
 import { version } from "../../../package.json";
 import { db } from "@/db";
@@ -28,7 +29,7 @@ const CHECK_ENV_VARS = [
   "GOOGLE_CLIENT_ID",
   "GOOGLE_CLIENT_SECRET",
   "BETTER_AUTH_SECRET",
-  "OPENROUTER_API_KEY",
+  ...AI_CHAT_ENV_KEYS,
 ] as const;
 
 const LEVEL_TO_STATUS = {

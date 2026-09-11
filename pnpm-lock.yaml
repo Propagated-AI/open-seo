@@ -36,6 +36,12 @@ importers:
 
   .:
     dependencies:
+      '@ai-sdk/anthropic':
+        specifier: ^3.0.116
+        version: 3.0.120(zod@4.3.6)
+      '@ai-sdk/openai':
+        specifier: ^3.0.106
+        version: 3.0.115(zod@4.3.6)
       '@ai-sdk/react':
         specifier: ^3.0.211
         version: 3.0.211(react@19.2.4)(zod@4.3.6)
@@ -274,6 +280,12 @@ importers:
 
 packages:
 
+  '@ai-sdk/anthropic@3.0.120':
+    resolution: {integrity: sha512-nDdCokLr0nexRUwUpWzzXzK73+KbejgmZMJdo8XthIeeeCXQvtKuhvpNs091N97NEaM3XHmOI55Z8/TWuNSWcQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/anthropic@4.0.24':
     resolution: {integrity: sha512-ywMZXK/uOIxUKwo2vaow0kt2XqMjIEeZWBOxif/oDka3294fUDX0gcUESUjPzd8254Fnvz1lRO70gr9LOgLkww==}
     engines: {node: '>=22'}
@@ -288,6 +300,12 @@ packages:
 
   '@ai-sdk/gateway@3.0.134':
     resolution: {integrity: sha512-PfUkQp01EihEyNM6e+nexXmVANiY5KcHMui/MmaHsC4KVVQYh/MwPeOsD3bTPu63e581BKO+AwaPPNmD4x943A==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/openai@3.0.115':
+    resolution: {integrity: sha512-4gNoCKEcr+nAtL/w/ZZl2fi4dXiicbJUK9qsoXGkhhJfbWWtOBXcH/xpmau6aZf+yaKqBtwm9SpCM8F5mk2Jsg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -6659,6 +6677,12 @@ packages:
 
 snapshots:
 
+  '@ai-sdk/anthropic@3.0.120(zod@4.3.6)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.16
+      '@ai-sdk/provider-utils': 4.0.51(zod@4.3.6)
+      zod: 4.3.6
+
   '@ai-sdk/anthropic@4.0.24(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 4.0.4
@@ -6677,6 +6701,12 @@ snapshots:
       '@ai-sdk/provider': 3.0.10
       '@ai-sdk/provider-utils': 4.0.51(zod@4.3.6)
       '@vercel/oidc': 3.2.0
+      zod: 4.3.6
+
+  '@ai-sdk/openai@3.0.115(zod@4.3.6)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.16
+      '@ai-sdk/provider-utils': 4.0.51(zod@4.3.6)
       zod: 4.3.6
 
   '@ai-sdk/openai@4.0.24(zod@4.3.6)':

@@ -1,6 +1,7 @@
 import type { LanguageModelV3 } from "@openrouter/ai-sdk-provider";
 import { subscribe } from "agents/observability";
 import { z } from "zod";
+import type { ChatModelConfig } from "@/lib/ai-config";
 
 // The chat agent's most common failure modes — a provider stream dying
 // mid-turn ("chat:request:failed", stage "stream") and a DO restart whose
@@ -33,6 +34,37 @@ const openRouterUsageSchema = z.object({
 export function openRouterCostUsd(providerMetadata: unknown): number {
   const parsed = openRouterUsageSchema.safeParse(providerMetadata);
   return parsed.success ? parsed.data.openrouter.usage.cost : 0;
+}
+
+const tokenUsageSchema = z.object({
+  inputTokens: z.number().nonnegative().optional(),
+  outputTokens: z.number().nonnegative().optional(),
+  totalTokens: z.number().nonnegative().optional(),
+});
+
+// Provider invoices remain authoritative. Missing USD cost is unknown, not free.
+// Log only numeric usage and model identity, never prompts, responses, or keys.
+export function logChatUsage(
+  config: Pick<ChatModelConfig, "provider" | "model">,
+  usage: unknown,
+  providerMetadata: unknown,
+): void {
+  const tokens = tokenUsageSchema.safeParse(usage);
+  const cost = openRouterUsageSchema.safeParse(providerMetadata);
+  console.info(
+    "[chat-usage]",
+    JSON.stringify({
+      provider: config.provider,
+      model: config.model,
+      inputTokens: tokens.success ? (tokens.data.inputTokens ?? null) : null,
+      outputTokens: tokens.success ? (tokens.data.outputTokens ?? null) : null,
+      totalTokens: tokens.success ? (tokens.data.totalTokens ?? null) : null,
+      costUsd:
+        config.provider === "openrouter" && cost.success
+          ? cost.data.openrouter.usage.cost
+          : null,
+    }),
+  );
 }
 
 // The provider package re-exports only LanguageModelV3 itself, so the stream

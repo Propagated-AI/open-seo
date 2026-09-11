@@ -31,7 +31,7 @@ Set these as Render runtime environment variables:
 | `VITE_SHOW_DEVTOOLS` | `false` |
 | `PORT` | `10000` |
 
-Optional: `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` for Search Console; `OPENROUTER_API_KEY` and optionally `OPENROUTER_MODEL` for SAM. Configure only the integrations you intend to use. Do not forward unrelated keys from your general-purpose `.env` to Render.
+Optional: `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` for Search Console; `AI_PROVIDER` with the selected provider’s key and model for SAM (OpenAI, Anthropic, or OpenRouter). See [AI provider setup](../../lab/ai-provider-setup.md). Configure only the integrations you intend to use. Do not forward unrelated keys from your general-purpose `.env` to Render.
 
 The Cloudflare provisioning token and Render management token belong on the operator's machine, not in the application's Render environment. The startup script rewrites build-generated `.dev.vars` from an explicit allowlist so runtime credential changes take effect without rebuilding. It also restores the current image's Worker deployment manifest into `.wrangler/deploy/config.json`, because the persistent disk hides files built at that path.
 

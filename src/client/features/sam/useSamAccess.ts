@@ -3,8 +3,8 @@ import { getStandardErrorMessage } from "@/client/lib/error-messages";
 import { isHostedClientAuthMode } from "@/lib/auth-mode";
 import { getSamAccessSetupStatus } from "@/serverFunctions/samAccess";
 
-// Fails closed: the chat only renders once the check confirms the OpenRouter
-// key is set. A failed check is an error with retry, not the key-missing gate.
+// Fails closed: the chat only renders once the check confirms the selected
+// AI provider is set. A failed check is an error with retry, not the key-missing gate.
 type SamAccess =
   | { status: "ready" }
   | { status: "checking" }
@@ -23,7 +23,7 @@ type SamAccess =
 
 export function useSamAccess(projectId: string): SamAccess {
   // Hosted deployments always have OPENROUTER_API_KEY provisioned (the server
-  // function short-circuits to enabled), so skip the round-trip entirely.
+  // runtime also validates it), so skip the round-trip entirely.
   const isHosted = isHostedClientAuthMode();
 
   const { data, error, isFetching, isRefetching, refetch } = useQuery({

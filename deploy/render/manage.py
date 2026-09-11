@@ -80,7 +80,8 @@ def main():
                     args.env_file.chmod(0o600)
             app_values = {key: values[key] for key in ["DATAFORSEO_API_KEY", "TEAM_DOMAIN", "POLICY_AUD",
                 "RENDER_MAINTENANCE_KEY", "BETTER_AUTH_SECRET", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET",
-                "OPENROUTER_API_KEY", "OPENROUTER_MODEL"] if values.get(key)}
+                "AI_PROVIDER", "OPENAI_API_KEY", "OPENAI_MODEL",
+                "ANTHROPIC_API_KEY", "ANTHROPIC_MODEL", "OPENROUTER_API_KEY", "OPENROUTER_MODEL"] if values.get(key)}
             app_values.update(AUTH_MODE="cloudflare_access", CLOUDFLARE_INCLUDE_PROCESS_ENV="true",
                 OPENSEO_TELEMETRY_DISABLED="1", VITE_SHOW_DEVTOOLS="false", PORT="10000")
             body = {"type": "web_service", "name": args.name, "ownerId": owner_id,

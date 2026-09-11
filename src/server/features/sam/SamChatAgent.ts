@@ -21,6 +21,7 @@ import { db, withPgClient } from "@/db";
 import { user } from "@/db/schema";
 import {
   openRouterCostUsd,
+  logChatUsage,
   staticAssistantModel,
 } from "@/server/lib/chatAgent";
 import { SamSessionRepository } from "@/server/features/sam/SamSessionRepository";
@@ -33,11 +34,11 @@ import {
   SamTelemetry,
   type SamTurnStats,
 } from "@/server/features/sam/samTurnTelemetry";
-import { buildChatAgentModel } from "@/server/lib/openrouter";
 import {
-  getEnvValueSync,
-  isHostedServerAuthMode,
-} from "@/server/lib/runtime-env";
+  buildAIChatModel,
+  getChatModelConfigSync,
+} from "@/server/lib/ai-model";
+import { isHostedServerAuthMode } from "@/server/lib/runtime-env";
 import {
   checkUsageCreditsDepleted,
   trackUsageCreditSpend,
@@ -195,15 +196,7 @@ export class SamChatAgent extends Think {
   }
 
   private buildModel(reasoningEffort: "max" | "low") {
-    const apiKey = getEnvValueSync(this.env, "OPENROUTER_API_KEY");
-    if (!apiKey) {
-      throw new Error("OPENROUTER_API_KEY is required for the SAM agent");
-    }
-    return buildChatAgentModel(
-      apiKey,
-      getEnvValueSync(this.env, "OPENROUTER_MODEL"),
-      reasoningEffort,
-    );
+    return buildAIChatModel(getChatModelConfigSync(this.env), reasoningEffort);
   }
 
   override getSkills() {
@@ -399,6 +392,11 @@ export class SamChatAgent extends Think {
     const costUsd = openRouterCostUsd(ctx.providerMetadata);
     this.recordSpend(costUsd);
     this.telemetry.step(ctx, costUsd);
+    logChatUsage(
+      getChatModelConfigSync(this.env),
+      ctx.usage,
+      ctx.providerMetadata,
+    );
   }
 
   // Add spend to the turn's unbilled total and meter it once a chunk has

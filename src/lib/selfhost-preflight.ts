@@ -1,3 +1,4 @@
+import { resolveChatModelConfig } from "./ai-config";
 import { AUTH_MODES } from "@/lib/auth-mode";
 import {
   looksLikeDataForSeoKey,
@@ -195,22 +196,22 @@ function checkOptionalFeatures(env: EnvRecord, items: PreflightItem[]): void {
     });
   }
 
-  items.push(
-    get(env, "OPENROUTER_API_KEY")
-      ? {
-          key: "ai",
-          name: "AI features",
-          level: "ok",
-          message: "OPENROUTER_API_KEY set",
-        }
-      : {
-          key: "ai",
-          name: "AI features",
-          level: "info",
-          message:
-            "OPENROUTER_API_KEY not set (optional) — SAM, the in-app SEO agent, is disabled.",
-        },
-  );
+  try {
+    const config = resolveChatModelConfig(env);
+    items.push({
+      key: "ai",
+      name: "AI features",
+      level: "ok",
+      message: `${config.provider} / ${config.model} configured`,
+    });
+  } catch (error) {
+    items.push({
+      key: "ai",
+      name: "AI features",
+      level: "info",
+      message: `${error instanceof Error ? error.message : "AI provider is not configured."} SAM is disabled (optional).`,
+    });
+  }
 }
 
 // Shared per-feature checks: the Docker preflight prints these at boot and
