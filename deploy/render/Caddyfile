@@ -20,6 +20,10 @@
 	handle {
 		forward_auth 127.0.0.1:3101 {
 			uri /_internal/access-check
+			# The auth subrequest is HTTP, even when the original request is
+			# upgrading to a chat WebSocket. Keep upgrade headers on the app proxy.
+			header_up -Upgrade
+			header_up -Connection
 			header_up Host localhost:3101
 			# Render terminates public HTTPS before this HTTP listener.
 			header_up X-Forwarded-Proto https

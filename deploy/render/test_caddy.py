@@ -3,6 +3,8 @@
 Run with CADDY_BINARY=/path/to/caddy python3 -m unittest discover
 -s deploy/render -p test_caddy.py. Ports 3101 and 3102 must be free.
 """
+import base64
+import hashlib
 import http.server
 import json
 import os
@@ -24,8 +26,19 @@ class Backend(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/_internal/access-check':
             status = 200 if self.headers.get('Cf-Access-Jwt-Assertion') == 'test-grant' else 401
+            if status == 200 and self.headers.get('Upgrade'):
+                status = 400  # Auth checks must remain ordinary HTTP requests.
             self.send_response(status)
             self.end_headers()
+            return
+        if self.path == '/agents/test/connection' and self.headers.get('Upgrade', '').lower() == 'websocket':
+            accept = base64.b64encode(hashlib.sha1((self.headers['Sec-WebSocket-Key'] + '258EAFA5-E914-47DA-95CA-C5AB0DC85B11').encode()).digest()).decode()
+            self.send_response(101)
+            self.send_header('Upgrade', 'websocket')
+            self.send_header('Connection', 'Upgrade')
+            self.send_header('Sec-WebSocket-Accept', accept)
+            self.end_headers()
+            self.wfile.write(b'\x81\x02ok')
             return
         self.send_response(200)
         self.end_headers()
@@ -72,6 +85,24 @@ class GatewayTest(unittest.TestCase):
                         if path.startswith('/api/'):
                             self.assertEqual(received['host'], 'localhost:3101')
                             self.assertNotIn('x-render-maintenance-key', received)
+                    for authorized in [False, True]:
+                        with socket.create_connection(('127.0.0.1', gateway_port), timeout=5) as ws:
+                            token = 'Cf-Access-Jwt-Assertion: test-grant\r\n' if authorized else ''
+                            ws.sendall((f'GET /agents/test/connection HTTP/1.1\r\nHost: seo.example.com\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n{token}\r\n').encode())
+                            response = b''
+                            while b'\r\n\r\n' not in response:
+                                chunk = ws.recv(4096)
+                                if not chunk:
+                                    break
+                                response += chunk
+                            self.assertIn(b' 101 ' if authorized else b' 401 ', response.split(b'\r\n')[0])
+                            if authorized:
+                                while b'\x81\x02ok' not in response:
+                                    chunk = ws.recv(4096)
+                                    if not chunk:
+                                        break
+                                    response += chunk
+                                self.assertIn(b'\x81\x02ok', response)
             finally:
                 if process:
                     process.terminate()

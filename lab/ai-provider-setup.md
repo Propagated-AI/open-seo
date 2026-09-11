@@ -45,3 +45,5 @@ Troubleshooting:
 - **429:** check provider credits and rate limits.
 - **Model/tool error:** use a chat model that supports streaming and tool calls; verify the exact provider-specific ID.
 - **Newly added key changes nothing:** this is intentional. `AI_PROVIDER` controls selection.
+
+Render gateway note: the Caddy `forward_auth` subrequest must strip `Upgrade` and `Connection`. The actual application proxy retains these headers for chat WebSockets. Without this separation, normal pages can work while chat messages never reach SAM. The gateway regression test covers both unauthorized rejection and an authorized WebSocket handshake/data frame.
