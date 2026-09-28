@@ -85,7 +85,10 @@ as well as idle health traffic before promoting the candidate.
 (128–1024 MiB). The supervisor applies these only to runtime child processes;
 the Docker build keeps its existing settings. Do not increase them without
 checking total container memory. No periodic restarts or larger Render plan
-are introduced by this change.
+are introduced by this change. `MINIFLARE_REGISTRY_PATH` is explicitly empty
+in runtime children: this disables cross-process development discovery and its
+unused Cap'n Proto debug listener. All application and audit workers remain in
+the same Miniflare instance, with their existing bindings and persistent state.
 
 The exact-pinned Miniflare patch backports the `MINIFLARE_WORKERD_V8_FLAGS`
 configuration support from Cloudflare workers-sdk PR

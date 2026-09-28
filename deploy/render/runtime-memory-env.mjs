@@ -12,6 +12,9 @@ export function runtimeMemoryEnv(env) {
   const node = budget("RENDER_NODE_HEAP_MB", 512);
   const worker = budget("RENDER_WORKER_HEAP_MB", 256);
   return {
+    // Preview serves all app workers in one process; cross-process development
+    // discovery only opens an unused Cap'n Proto debug listener on Render.
+    MINIFLARE_REGISTRY_PATH: "",
     NODE_OPTIONS:
       `${env.NODE_OPTIONS || ""} --max-old-space-size=${node}`.trim(),
     MINIFLARE_WORKERD_V8_FLAGS: `--max-old-space-size=${worker} --gc-global`,

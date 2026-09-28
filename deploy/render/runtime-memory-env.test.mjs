@@ -4,6 +4,7 @@ import { runtimeMemoryEnv } from "./runtime-memory-env.mjs";
 
 test("sets separate Node and workerd GC budgets without copying secrets", () => {
   assert.deepEqual(runtimeMemoryEnv({ OPENAI_API_KEY: "do-not-copy" }), {
+    MINIFLARE_REGISTRY_PATH: "",
     NODE_OPTIONS: "--max-old-space-size=512",
     MINIFLARE_WORKERD_V8_FLAGS: "--max-old-space-size=256 --gc-global",
   });
