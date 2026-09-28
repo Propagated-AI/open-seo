@@ -32,6 +32,11 @@ overrides:
   nanoid@3: ^3.3.18
   toml@4: ^4.2.0
 
+patchedDependencies:
+  miniflare@4.20260625.0:
+    hash: 8ad561fa70e3acbaa30bcebd59a0f5018a7694d1b9a38c826e1fcc4812ee9d10
+    path: patches/miniflare@4.20260625.0.patch
+
 importers:
 
   .:
@@ -7420,7 +7425,7 @@ snapshots:
   '@cloudflare/vite-plugin@1.42.3(@types/node@22.19.11)(vite@7.3.6(@types/node@22.19.11)(jiti@2.7.0)(lightningcss@1.33.0)(tsx@4.22.4)(yaml@2.9.1))(workerd@1.20260625.1)(wrangler@4.105.0(@cloudflare/workers-types@4.20260702.1)(@types/node@22.19.11))':
     dependencies:
       '@cloudflare/unenv-preset': 2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260625.1)
-      miniflare: 4.20260625.0(@types/node@22.19.11)
+      miniflare: 4.20260625.0(patch_hash=8ad561fa70e3acbaa30bcebd59a0f5018a7694d1b9a38c826e1fcc4812ee9d10)(@types/node@22.19.11)
       unenv: 2.0.0-rc.24
       vite: 7.3.6(@types/node@22.19.11)(jiti@2.7.0)(lightningcss@1.33.0)(tsx@4.22.4)(yaml@2.9.1)
       wrangler: 4.105.0(@cloudflare/workers-types@4.20260702.1)(@types/node@22.19.11)
@@ -11476,7 +11481,7 @@ snapshots:
 
   mimic-response@3.1.0: {}
 
-  miniflare@4.20260625.0(@types/node@22.19.11):
+  miniflare@4.20260625.0(patch_hash=8ad561fa70e3acbaa30bcebd59a0f5018a7694d1b9a38c826e1fcc4812ee9d10)(@types/node@22.19.11):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       sharp: 0.35.4(@types/node@22.19.11)
@@ -13008,7 +13013,7 @@ snapshots:
       '@cloudflare/unenv-preset': 2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260625.1)
       blake3-wasm: 2.1.5
       esbuild: 0.28.1
-      miniflare: 4.20260625.0(@types/node@22.19.11)
+      miniflare: 4.20260625.0(patch_hash=8ad561fa70e3acbaa30bcebd59a0f5018a7694d1b9a38c826e1fcc4812ee9d10)(@types/node@22.19.11)
       path-to-regexp: 6.3.0
       unenv: 2.0.0-rc.24
       workerd: 1.20260625.1

@@ -12,6 +12,8 @@ import { createReadStream } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { once } from "node:events";
+import { logMemory } from "./memory.mjs";
+import { runtimeMemoryEnv } from "./runtime-memory-env.mjs";
 
 for (const name of [
   "DATAFORSEO_API_KEY",
@@ -30,6 +32,7 @@ if (process.env.AUTH_MODE !== "cloudflare_access")
 
 const childEnv = {
   ...process.env,
+  ...runtimeMemoryEnv(process.env),
   PORT: "3101",
   CLOUDFLARE_INCLUDE_PROCESS_ENV: "true",
 };
@@ -252,11 +255,12 @@ async function shutdown(code = 0) {
   if (stopping) return;
   stopping = true;
   clearInterval(interval);
+  clearInterval(memoryInterval);
   server.close();
   await Promise.all([stopChild(app), stopChild(gateway)]);
   process.exit(code);
 }
-let interval;
+let interval, memoryInterval;
 process.on("SIGTERM", () => void shutdown());
 process.on("SIGINT", () => void shutdown());
 try {
@@ -275,6 +279,9 @@ try {
   gateway.on("error", () => void shutdown(1));
   await waitHealthy();
   console.log("[render] Authenticated gateway and database are ready");
+  await logMemory();
+  memoryInterval = setInterval(() => void logMemory(), 60_000);
+  memoryInterval.unref();
   await tick();
   interval = setInterval(() => void tick(), 5 * 60 * 1000);
 } catch (error) {

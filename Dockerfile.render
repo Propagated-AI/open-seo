@@ -8,6 +8,7 @@ ENV PATH=$PNPM_HOME:$PATH
 WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@10.30.1 --activate
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY patches ./patches
 RUN pnpm install --frozen-lockfile
 COPY . .
 # Only public build configuration belongs here; API credentials arrive at runtime.

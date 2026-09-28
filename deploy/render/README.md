@@ -69,3 +69,47 @@ Before an update, download a backup, record the running commit, inspect upstream
 - Credentials stay out of source, client bundles, screenshots, and reports.
 
 See the verification report for what was actually tested on the deployed instance.
+
+## Runtime memory candidate (September 2026)
+
+The Render adapter now gives Node a 512 MiB old-space budget and workerd a
+256 MiB old-space budget, with full garbage collections enabled for workerd.
+This targets request-scoped native objects that were accumulating between full
+collections. These are per-runtime/isolate heap settings, **not container RSS
+limits**; native allocations, multiple isolates, Caddy, and filesystem cache
+also consume the 2 GiB instance budget. Full collection can increase CPU time
+and request latency, so validate representative AI, audit, and research work
+as well as idle health traffic before promoting the candidate.
+
+`RENDER_NODE_HEAP_MB` and `RENDER_WORKER_HEAP_MB` optionally override the defaults
+(128–1024 MiB). The supervisor applies these only to runtime child processes;
+the Docker build keeps its existing settings. Do not increase them without
+checking total container memory. No periodic restarts or larger Render plan
+are introduced by this change.
+
+The exact-pinned Miniflare patch backports the `MINIFLARE_WORKERD_V8_FLAGS`
+configuration support from Cloudflare workers-sdk PR
+[14702](https://github.com/cloudflare/workers-sdk/pull/14702). It changes no
+storage formats or bindings. Docker must copy `patches/` before installing the
+frozen lockfile. Remove the patch after a separately tested dependency upgrade
+includes that upstream change.
+
+Look for `[render-memory]` once per minute in Render logs. Each sample contains
+container usage/limit and descendant process names, PIDs, and RSS only; no
+arguments, environment values, tokens, or request bodies are recorded.
+
+Run the adapter regression checks with:
+
+```sh
+node --test deploy/render/memory.test.mjs deploy/render/runtime-memory-env.test.mjs
+pnpm exec vitest run src/server/render-maintenance.test.ts
+python3 -m unittest discover -s deploy/render -p 'test_*.py'
+pnpm build
+```
+
+A successful build is not evidence of long-term memory stability. Deploy to the
+teaching demo first, check authentication and persisted data, and observe at
+least 72 hours with no OOM event and a stable memory trend. Keep the main service
+on its prior revision until those checks pass. Revert the demo to its recorded
+previous commit if startup, health, or functional checks regress; this candidate
+adds no database migration.
