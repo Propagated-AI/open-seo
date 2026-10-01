@@ -117,7 +117,7 @@ export function SamChat({
     );
   }
 
-  // SAM cannot answer a turn without OPENROUTER_API_KEY, so surface setup
+  // SAM cannot answer a turn without a configured AI provider, so surface setup
   // instructions instead of letting a chat fail mid-stream (self-hosted only).
   if (access.status === "setup") {
     return (

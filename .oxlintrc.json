@@ -12,7 +12,10 @@
     "web",
     "src/routeTree.gen.ts",
     "src/worker-configuration.d.ts",
-    "scripts"
+    "scripts",
+    // Plain-JS Render runtime with its own node:test suite; the type-aware
+    // rules cannot see types there, the same reason scripts/ is skipped.
+    "deploy/render"
   ],
   "rules": {
     "react/react-in-jsx-scope": "off",

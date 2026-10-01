@@ -1,0 +1,46 @@
+{
+	admin off
+	auto_https off
+}
+
+:{$PORT:10000} {
+	header {
+		X-Robots-Tag "noindex, nofollow, noarchive"
+		X-Content-Type-Options nosniff
+		Referrer-Policy same-origin
+		Cache-Control "private, no-store"
+	}
+	@internal path /_internal/* /cdn-cgi/*
+	handle @internal {
+		respond 404
+	}
+	handle /healthz {
+		reverse_proxy 127.0.0.1:3102
+	}
+	handle {
+		forward_auth 127.0.0.1:3101 {
+			uri /_internal/access-check
+			# The auth subrequest is HTTP, even when the original request is
+			# upgrading to a chat WebSocket. Keep upgrade headers on the app proxy.
+			header_up -Upgrade
+			header_up -Connection
+			header_up Host localhost:3101
+			# Render terminates public HTTPS before this HTTP listener.
+			header_up X-Forwarded-Proto https
+		}
+		handle /_ops/* {
+			reverse_proxy 127.0.0.1:3102 {
+				header_up X-Forwarded-Proto https
+				header_up -Authorization
+			}
+		}
+		handle {
+			reverse_proxy 127.0.0.1:3101 {
+				header_up Host localhost:3101
+				header_up X-Forwarded-Proto https
+				header_up -Authorization
+				header_up -X-Render-Maintenance-Key
+			}
+		}
+	}
+}

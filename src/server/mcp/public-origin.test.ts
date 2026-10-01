@@ -15,6 +15,22 @@ describe("getPublicOrigin", () => {
     );
   });
 
+  it.each(["localhost", "127.0.0.1", "[::1]"])(
+    "uses the public host for HTTPS loopback requests through %s",
+    (host) => {
+      const request = new Request(
+        `https://${host}:3101/api/ga4/oauth/callback`,
+        {
+          headers: {
+            "x-forwarded-proto": "https",
+            "x-forwarded-host": "seo.example.com",
+          },
+        },
+      );
+      expect(getPublicOrigin(request)).toBe("https://seo.example.com");
+    },
+  );
+
   it("ignores forwarded hosts when the request is already public https", () => {
     const request = new Request("https://app.openseo.so/api/oauth/consent", {
       headers: {

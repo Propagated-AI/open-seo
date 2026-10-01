@@ -1,5 +1,14 @@
 # OpenSEO
 
+> **Propagated AI edition.** This copy of [OpenSEO](https://github.com/every-app/open-seo) is the one used in the Propagated AI SEO lab. It is the original app with a few fixes and additions:
+>
+> - `pnpm dev` starts on a fresh install. The original v0.1.10 stops with a devtools error ([every-app/open-seo#382](https://github.com/every-app/open-seo/issues/382)).
+> - Memory limits that keep a hosted dashboard running for days on Render.
+> - Optional hosting on Render behind Cloudflare Access.
+> - Sam, the dashboard's chat, can use an OpenAI or Anthropic key as well as OpenRouter.
+>
+> Everything else is the original, under its MIT licence. The full list, and how we keep up with new releases, is in [UPSTREAM.md](UPSTREAM.md). To run it on your computer, follow [docs/LOCAL_DEVELOPMENT.md](docs/LOCAL_DEVELOPMENT.md).
+
 > Open source alternative to Semrush and Ahrefs
 
 OpenSEO is an SEO tool for _the people_. If tools like Semrush or Ahrefs are too expensive or bloated, OpenSEO is a pay-as-you-go alternative that you actually control.

@@ -1,13 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import {
-  getOptionalEnvValue,
-  isHostedServerAuthMode,
-} from "@/server/lib/runtime-env";
+import { getChatModelConfig } from "@/server/lib/ai-model";
 import { requireProjectContext } from "@/serverFunctions/middleware";
-
-const OPENROUTER_KEY_MISSING_MESSAGE =
-  "OPENROUTER_API_KEY is not set for this deployment yet. Add it to your environment, restart OpenSEO, then confirm here.";
 
 const projectScopedSchema = z.object({ projectId: z.string().min(1) });
 
@@ -16,20 +10,21 @@ type SamAccessStatus = {
   errorMessage: string | null;
 };
 
-// Gates the in-app AI agent (SAM) on an OpenRouter key being configured, the
-// same way backlinks/AI-search gate on their DataForSEO subscriptions. Hosted
-// deployments always have the key provisioned, so only self-hosted is checked.
+// Validate the same provider configuration used by the chat runtime.
 export const getSamAccessSetupStatus = createServerFn({ method: "GET" })
   .middleware(requireProjectContext)
   .validator(projectScopedSchema)
   .handler(async (): Promise<SamAccessStatus> => {
-    if (await isHostedServerAuthMode()) {
+    try {
+      await getChatModelConfig();
       return { enabled: true, errorMessage: null };
+    } catch (error) {
+      return {
+        enabled: false,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : "AI provider configuration is incomplete.",
+      };
     }
-
-    const enabled = Boolean(await getOptionalEnvValue("OPENROUTER_API_KEY"));
-    return {
-      enabled,
-      errorMessage: enabled ? null : OPENROUTER_KEY_MISSING_MESSAGE,
-    };
   });

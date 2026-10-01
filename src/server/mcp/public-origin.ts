@@ -9,7 +9,10 @@ function getForwardedProtocol(request: Request) {
 
 export function getPublicOrigin(request: Request) {
   const url = new URL(request.url);
-  if (url.protocol === "https:") {
+  // Vite can combine the forwarded HTTPS scheme with Caddy's loopback Host.
+  // Recover the public host in that case; public HTTPS URLs remain authoritative.
+  const isLoopback = ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
+  if (url.protocol === "https:" && !isLoopback) {
     return url.origin;
   }
 

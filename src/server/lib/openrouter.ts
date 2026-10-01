@@ -56,6 +56,8 @@ export function buildChatAgentModel(
 
   return openrouter(model, {
     usage: { include: true },
-    extraBody: { reasoning: { effort: reasoningEffort } },
+    ...(model.startsWith("openai/gpt-5")
+      ? { extraBody: { reasoning: { effort: reasoningEffort } } }
+      : {}),
   });
 }

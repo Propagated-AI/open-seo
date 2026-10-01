@@ -27,6 +27,7 @@ import { sweepDubReferredOrganizations } from "@/server/referrals/dub";
 import { maybeSendSelfHostHeartbeat } from "@/server/lib/self-host-telemetry";
 import { handleGdprStorageErasure } from "@/server/gdpr/storage-erasure";
 import { GDPR_STORAGE_ERASURE_PATH } from "@/shared/gdpr-erasure";
+import { handleRenderMaintenance } from "@/server/render-maintenance";
 
 const startHandler = createStartHandler(defaultStreamHandler);
 
@@ -135,15 +136,40 @@ function fetch(
   return withPgClient(() => Promise.resolve(handleFetch(request, env, ctx)));
 }
 
-function handleFetch(
+async function handleFetch(
   request: Request,
   env: Env,
   ctx: ExecutionContext,
-): Response | Promise<Response> {
+): Promise<Response> {
   const authMode = getAuthMode(env.AUTH_MODE);
   const publicRequest = requestWithPublicOrigin(request);
   const pathname = new URL(publicRequest.url).pathname;
   ctx.waitUntil(maybeSendSelfHostHeartbeat(pathname));
+
+  if (pathname === "/_internal/access-check") {
+    if (authMode !== "cloudflare_access") {
+      return new Response("Access gateway is not configured", { status: 503 });
+    }
+    try {
+      await resolveUserContextFromHeaders(request.headers);
+      return new Response(null, { status: 200 });
+    } catch {
+      return new Response("Sign in through the team's Cloudflare Access URL", {
+        status: 401,
+      });
+    }
+  }
+
+  if (pathname === "/_internal/render-tick") {
+    return handleRenderMaintenance(
+      request,
+      Reflect.get(env, "RENDER_MAINTENANCE_KEY"),
+      async () => {
+        await reconcileStaleAudits();
+        await runScheduledRankChecks(env);
+      },
+    );
+  }
 
   if (pathname === GDPR_STORAGE_ERASURE_PATH) {
     return handleGdprStorageErasure(publicRequest, env);

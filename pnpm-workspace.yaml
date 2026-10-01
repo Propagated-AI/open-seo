@@ -94,3 +94,7 @@ overrides:
   mysql2: "^3.23.1"
   "nanoid@3": "^3.3.18"
   "toml@4": "^4.2.0"
+
+# Backport Cloudflare workers-sdk PR #14702: expose workerd V8 heap settings.
+patchedDependencies:
+  miniflare@4.20260625.0: patches/miniflare@4.20260625.0.patch

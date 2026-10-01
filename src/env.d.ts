@@ -55,7 +55,13 @@ declare namespace Cloudflare {
     // DataForSEO API Basic auth value (base64 of login:password)
     DATAFORSEO_API_KEY: string;
 
-    // OpenRouter API key for the SAM in-app chat agent.
+    AI_PROVIDER?: "openai" | "anthropic" | "openrouter";
+    OPENAI_API_KEY?: string;
+    OPENAI_MODEL?: string;
+    ANTHROPIC_API_KEY?: string;
+    ANTHROPIC_MODEL?: string;
+
+    // OpenRouter API key for the SAM in-app chat agent (the default provider).
     OPENROUTER_API_KEY?: string;
     // Optional OpenRouter model slug override (defaults in openrouter.ts).
     OPENROUTER_MODEL?: string;
