@@ -30,14 +30,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--env-file", type=Path, required=True)
     parser.add_argument("--state", type=Path, required=True)
-    parser.add_argument("--repo", default="https://github.com/leo1aimpact/propagated-openseo")
+    parser.add_argument("--repo", default="https://github.com/Propagated-AI/open-seo")
     parser.add_argument("--name", default="propagated-openseo")
     parser.add_argument("--region", default="singapore")
     parser.add_argument("--plan", default="1c-2g")
     parser.add_argument("--commit")
-    parser.add_argument("--domain", default="seo.propagated.ai")
+    parser.add_argument("--domain", help="Your hostname, for example seo.example.com")
     parser.add_argument("action", choices=["create", "status", "logs", "deploy", "restart", "add-domain", "verify-domain"])
     args = parser.parse_args()
+    if args.action in ("add-domain", "verify-domain") and not args.domain:
+        parser.error(f"{args.action} needs --domain")
     values = read_env(args.env_file)
 
     def request(path, method="GET", payload=None):

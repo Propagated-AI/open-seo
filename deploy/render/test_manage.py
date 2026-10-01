@@ -62,7 +62,7 @@ class RenderManagementTests(unittest.TestCase):
 
     def test_existing_matching_service_is_not_created_again(self):
         requests, state, _ = self.run_create(existing=[{"service": {
-            "name": "propagated-openseo", "repo": "https://github.com/leo1aimpact/propagated-openseo", "id": "srv-existing"}}])
+            "name": "propagated-openseo", "repo": "https://github.com/Propagated-AI/open-seo", "id": "srv-existing"}}])
         self.assertTrue(all(request.method == "GET" for request in requests))
         self.assertEqual(state["serviceId"], "srv-existing")
 
